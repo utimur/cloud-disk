@@ -22,8 +22,12 @@ public class User {
 
     private Boolean hasAvatar = false;
 
-//
-//    // Заменить на OneToOne
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
+    private List<Role> roles;
+
     @OneToOne
     @JoinColumn(name = "id", referencedColumnName = "user_id")
     private Basket basket;
