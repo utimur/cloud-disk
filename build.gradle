@@ -24,15 +24,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.flywaydb:flyway-core'
 
-
-	// https://mvnrepository.com/artifact/javax.validation/validation-api
 	compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
 
 	// Tests
 	testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
 
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // JWT
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
 	// Swagger
 	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
