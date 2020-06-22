@@ -3,6 +3,7 @@ package com.example.clouddisk.models;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "usr")
@@ -23,8 +24,12 @@ public class User {
 
 //
 //    // Заменить на OneToOne
-//    private Long basket_id;
-//    // Заменить на OneToOne
-//    private Long disk_id;
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private Basket basket;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private Disk disk;
 
 }
