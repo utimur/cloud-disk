@@ -8,6 +8,7 @@ import com.example.clouddisk.models.Role;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.repos.RoleRepo;
 import com.example.clouddisk.repos.UserRepo;
+import com.example.clouddisk.service.file.FileService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -39,7 +39,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody User user) throws UsernameAlreadyExist, MailAlreadyExist {
-        return ResponseEntity.ok(userService.register(user));
+        return ResponseEntity.ok(UserDto.fromUser(userService.register(user)));
     }
 
     @PostMapping("/login")

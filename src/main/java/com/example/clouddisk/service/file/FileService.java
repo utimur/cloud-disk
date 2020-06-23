@@ -1,4 +1,4 @@
-package com.example.clouddisk.service;
+package com.example.clouddisk.service.file;
 
 import com.example.clouddisk.exceptions.file.DirAlreadyExistException;
 import com.example.clouddisk.exceptions.file.DirNotCreatedException;
@@ -11,8 +11,8 @@ import java.io.File;
 @Service
 public class FileService {
 
-    @Value("${file.system.path}")
-    private String FILE_PATH;
+    public static String FILE_PATH = "src\\main\\resources\\static\\";
+    public static String DEFAULT_AVATAR = "src\\main\\resources\\avatar.jpg";
 
 
     public void createRoot(User user) {
