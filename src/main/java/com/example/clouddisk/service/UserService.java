@@ -8,12 +8,18 @@ import com.example.clouddisk.models.Role;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.repos.RoleRepo;
 import com.example.clouddisk.repos.UserRepo;
+import com.example.clouddisk.security.jwt.JwtTokenProvider;
 import com.example.clouddisk.service.file.FileService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -22,12 +28,14 @@ public class UserService {
     private final RoleRepo roleRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private final FileService fileService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService) {
+    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService, JwtTokenProvider jwtTokenProvider) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.passwordEncoder = passwordEncoder;
         this.fileService = fileService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public User register(User user) throws UsernameAlreadyExist, MailAlreadyExist {
@@ -64,5 +72,23 @@ public class UserService {
 
     public List<User> getAll() {
         return userRepo.findAll();
+    }
+
+    public User getUserByToken(String token) {
+        String authToken = token.substring(7);
+        return userRepo.findByUsername(jwtTokenProvider.getUsername(authToken));
+    }
+
+    public User saveAvatar(MultipartFile img, User user) throws IOException {
+        if(img != null) {
+            String fileName = "avatar.jpg";
+            File convertFile = new File(FileService.FILE_PATH + user.getUsername() + "\\" + fileName);
+            convertFile.createNewFile();
+            FileOutputStream fout = new FileOutputStream(convertFile);
+            fout.write(img.getBytes());
+            fout.close();
+        }
+        user.setHasAvatar(true);
+        return userRepo.save(user);
     }
 }
