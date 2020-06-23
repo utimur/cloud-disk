@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -21,13 +20,13 @@ public class UserService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final FileService fileService;
 
-
-
-    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.passwordEncoder = passwordEncoder;
+        this.fileService = fileService;
     }
 
     public User register(User user) throws UsernameAlreadyExist, MailAlreadyExist {
@@ -40,6 +39,9 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         List<Role> roles = Arrays.asList(roleRepo.findById(1L).get());
         user.setRoles(roles);
+
+        fileService.createRoot(user);
+
         return userRepo.save(user);
     }
 

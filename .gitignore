@@ -15,6 +15,7 @@ build/
 .sts4-cache
 
 src/main/resources/application.properties
+src/main/resources/static
 
 ### IntelliJ IDEA ###
 .idea
