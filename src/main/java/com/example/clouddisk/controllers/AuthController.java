@@ -52,8 +52,8 @@ public class AuthController {
             String token = jwtTokenProvider.createToken(username, user.getRoles(), user.getId());
 
             Map<Object, Object> response = new HashMap<>();
-            response.put("user", UserDto.fromUser(user));
             response.put("token", token);
+            response.put("user", UserDto.fromUser(user));
 
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {

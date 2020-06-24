@@ -28,21 +28,27 @@ public class CloudFile {
     @JoinColumn(name = "access_id", referencedColumnName = "id")
     private Access access;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "basket_id")
-    Basket basket;
+    private Basket basket;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "disk_id")
-    Disk disk;
+    private Disk disk;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "parent_id", referencedColumnName = "id")
     private CloudFile parent;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(cascade = CascadeType.ALL ,mappedBy = "parent")
     private List<CloudFile> cloudFiles;
 
-    private boolean is_dir = false;
 
+    @Override
+    public String toString() {
+        return "CloudFile{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

@@ -3,6 +3,7 @@ package com.example.clouddisk.controllers;
 
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.service.UserService;
+import com.example.clouddisk.service.file.Base64Encoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class UserController {
 
         User user = userService.getUserByToken(authHeader);
         userService.saveAvatar(img, user);
+
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

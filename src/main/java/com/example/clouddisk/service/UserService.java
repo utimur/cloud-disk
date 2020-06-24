@@ -4,8 +4,12 @@ package com.example.clouddisk.service;
 import com.example.clouddisk.exceptions.user.MailAlreadyExist;
 import com.example.clouddisk.exceptions.user.UserNotFoundException;
 import com.example.clouddisk.exceptions.user.UsernameAlreadyExist;
+import com.example.clouddisk.models.Basket;
+import com.example.clouddisk.models.Disk;
 import com.example.clouddisk.models.Role;
 import com.example.clouddisk.models.User;
+import com.example.clouddisk.repos.BasketRepo;
+import com.example.clouddisk.repos.DiskRepo;
 import com.example.clouddisk.repos.RoleRepo;
 import com.example.clouddisk.repos.UserRepo;
 import com.example.clouddisk.security.jwt.JwtTokenProvider;
@@ -19,7 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -29,13 +32,17 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final FileService fileService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final DiskRepo diskRepo;
+    private final BasketRepo basketRepo;
 
-    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService, JwtTokenProvider jwtTokenProvider) {
+    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService, JwtTokenProvider jwtTokenProvider, DiskRepo diskRepo, BasketRepo basketRepo) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.passwordEncoder = passwordEncoder;
         this.fileService = fileService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.diskRepo = diskRepo;
+        this.basketRepo = basketRepo;
     }
 
     public User register(User user) throws UsernameAlreadyExist, MailAlreadyExist {
@@ -45,13 +52,25 @@ public class UserService {
         if (userRepo.findByMail(user.getMail()) != null) {
             throw new MailAlreadyExist(String.format("User with mail %s already exist", user.getMail()));
         }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         List<Role> roles = Arrays.asList(roleRepo.findById(1L).get());
         user.setRoles(roles);
 
+        userRepo.save(user);
+
+        Disk disk = new Disk();
+        Basket basket = new Basket();
+
+        disk.setUser(user);
+        basket.setUser(user);
+
+        diskRepo.save(disk);
+        basketRepo.save(basket);
+
         fileService.createRoot(user);
 
-        return userRepo.save(user);
+        return user;
     }
 
     public User findByUsername(String username) throws UserNotFoundException {

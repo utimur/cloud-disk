@@ -28,12 +28,11 @@ public class User {
             inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")})
     private List<Role> roles;
 
-    @OneToOne
-    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    @OneToOne(cascade = CascadeType.ALL,mappedBy = "user")
+    private Disk disk;
+
+    @OneToOne(cascade = CascadeType.ALL,mappedBy = "user")
     private Basket basket;
 
-    @OneToOne
-    @JoinColumn(name = "id", referencedColumnName = "user_id")
-    private Disk disk;
 
 }

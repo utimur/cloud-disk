@@ -2,8 +2,13 @@ package com.example.clouddisk.service.file;
 
 import com.example.clouddisk.exceptions.file.DirAlreadyExistException;
 import com.example.clouddisk.exceptions.file.DirNotCreatedException;
+import com.example.clouddisk.models.Basket;
+import com.example.clouddisk.models.CloudFile;
+import com.example.clouddisk.models.Disk;
 import com.example.clouddisk.models.User;
-import org.springframework.beans.factory.annotation.Value;
+import com.example.clouddisk.repos.BasketRepo;
+import com.example.clouddisk.repos.CloudFileRepo;
+import com.example.clouddisk.repos.DiskRepo;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -13,6 +18,16 @@ public class FileService {
 
     public static String FILE_PATH = "src\\main\\resources\\static\\";
     public static String DEFAULT_AVATAR = "src\\main\\resources\\avatar.jpg";
+
+    private final CloudFileRepo cloudFileRepo;
+    private final DiskRepo diskRepo;
+    private final BasketRepo basketRepo;
+
+    public FileService(CloudFileRepo cloudFileRepo, DiskRepo diskRepo, BasketRepo basketRepo) {
+        this.cloudFileRepo = cloudFileRepo;
+        this.diskRepo = diskRepo;
+        this.basketRepo = basketRepo;
+    }
 
 
     public void createRoot(User user) {
@@ -25,7 +40,7 @@ public class FileService {
     public File createDir(String path){
         File file = new File(path);
         if (!file.exists()) {
-            if(!file.mkdir()){
+            if (!file.mkdir()) {
                 throw new DirNotCreatedException("Dir not created");
             }
         } else {
@@ -33,4 +48,34 @@ public class FileService {
         }
         return file;
     }
+
+
+    // найти файл на диске
+    public String getFullUserDiskPath(CloudFile cloudFile, User user) {
+        String path = "\\" + cloudFile.getName();
+        while (cloudFile.getParent() != null) {
+            cloudFile = cloudFileRepo.findById(cloudFile.getParent().getId()).get();
+            path = "\\" + cloudFile.getName() + path;
+        }
+        return FILE_PATH + user.getUsername() + "\\disk" + path;
+    }
+
+    public CloudFile getCloudFileById(Long id) {
+        return cloudFileRepo.findById(id).get();
+    }
+
+
+    // Добавить директорию
+    public CloudFile saveDir(CloudFile cloudFile, User user) {
+        if(cloudFile.getParent() != null) {
+            CloudFile parent = cloudFileRepo.findById(cloudFile.getParent().getId()).get();
+            cloudFile.setParent(parent);
+        }
+        String path = getFullUserDiskPath(cloudFile, user);
+        createDir(path);
+        cloudFile.setDisk(user.getDisk());
+
+        return cloudFileRepo.save(cloudFile);
+    }
+
 }

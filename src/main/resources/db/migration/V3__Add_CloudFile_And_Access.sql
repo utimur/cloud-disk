@@ -15,6 +15,5 @@ CREATE TABLE file (
     disk_id bigint REFERENCES disk,
     basket_id bigint REFERENCES basket,
     parent_id bigint REFERENCES file,
-    is_dir boolean default false,
     PRIMARY KEY(id)
 ) engine=myISAM;

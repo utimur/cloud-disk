@@ -13,9 +13,11 @@ public class Disk {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "disk")
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToMany(mappedBy = "disk")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "disk")
     List<CloudFile> cloudFiles;
 }
