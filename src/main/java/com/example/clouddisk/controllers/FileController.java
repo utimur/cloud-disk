@@ -1,6 +1,7 @@
 package com.example.clouddisk.controllers;
 
 
+import com.example.clouddisk.dto.CloudFileDto;
 import com.example.clouddisk.models.CloudFile;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.service.UserService;
@@ -25,9 +26,8 @@ public class FileController {
 
     @PostMapping
     public ResponseEntity createDirectory(@RequestHeader("Authorization") String authHeader,
-                                       @RequestBody CloudFile cloudFile) {
+                                       @RequestBody CloudFileDto cloudFileDto) {
         User user = userService.getUserByToken(authHeader);
-        fileService.saveDir(cloudFile, user);
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok(CloudFileDto.fromCloudFile(fileService.saveDir(cloudFileDto, user)));
     }
 }

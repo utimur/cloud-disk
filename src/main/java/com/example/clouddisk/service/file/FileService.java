@@ -1,5 +1,6 @@
 package com.example.clouddisk.service.file;
 
+import com.example.clouddisk.dto.CloudFileDto;
 import com.example.clouddisk.exceptions.file.DirAlreadyExistException;
 import com.example.clouddisk.exceptions.file.DirNotCreatedException;
 import com.example.clouddisk.models.Basket;
@@ -66,14 +67,17 @@ public class FileService {
 
 
     // Добавить директорию
-    public CloudFile saveDir(CloudFile cloudFile, User user) {
-        if(cloudFile.getParent() != null) {
-            CloudFile parent = cloudFileRepo.findById(cloudFile.getParent().getId()).get();
+    public CloudFile saveDir(CloudFileDto cloudFileDto, User user) {
+        CloudFile cloudFile = CloudFileDto.toCloudFile(cloudFileDto);
+
+        if(cloudFileDto.getParentId() != null) {
+            CloudFile parent = cloudFileRepo.findById(cloudFileDto.getParentId()).get();
             cloudFile.setParent(parent);
         }
         String path = getFullUserDiskPath(cloudFile, user);
         createDir(path);
         cloudFile.setDisk(user.getDisk());
+        cloudFile.setBasket(user.getBasket());
 
         return cloudFileRepo.save(cloudFile);
     }
