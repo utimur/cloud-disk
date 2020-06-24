@@ -28,8 +28,6 @@ public class FileService {
             if(!file.mkdir()){
                 throw new DirNotCreatedException("Dir not created");
             }
-        } else {
-            throw new DirAlreadyExistException("Dir already exist");
         }
         return file;
     }

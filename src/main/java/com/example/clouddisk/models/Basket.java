@@ -12,8 +12,11 @@ public class Basket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(mappedBy = "basket")
-    private User user;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User basketUser;
+
     @OneToMany(mappedBy = "basket")
     private List<CloudFile> cloudFiles;
 }

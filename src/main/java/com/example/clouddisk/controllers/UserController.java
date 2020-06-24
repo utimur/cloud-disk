@@ -1,6 +1,7 @@
 package com.example.clouddisk.controllers;
 
 
+import com.example.clouddisk.dto.AuthDto;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,14 @@ public class UserController {
         User user = userService.getUserByToken(authHeader);
         userService.saveAvatar(img, user);
 
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/password")
+    public ResponseEntity changeUserPassword(@RequestHeader("Authorization") String authHeader,
+                                             @RequestBody AuthDto authDto){
+        User user = userService.getUserByToken(authHeader);
+        userService.changePassword(user, authDto.getPassword());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

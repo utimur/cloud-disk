@@ -13,8 +13,9 @@ public class Disk {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "disk")
-    private User user;
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User diskUser;
 
     @OneToMany(mappedBy = "disk")
     List<CloudFile> cloudFiles;
