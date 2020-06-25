@@ -5,10 +5,14 @@ import com.example.clouddisk.dto.AuthDto;
 import com.example.clouddisk.dto.UserDto;
 import com.example.clouddisk.exceptions.user.MailAlreadyExist;
 import com.example.clouddisk.exceptions.user.UsernameAlreadyExist;
+import com.example.clouddisk.models.Disk;
 import com.example.clouddisk.models.User;
+import com.example.clouddisk.repos.DiskRepo;
+import com.example.clouddisk.repos.UserRepo;
 import com.example.clouddisk.security.jwt.JwtTokenProvider;
 import com.example.clouddisk.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -59,5 +63,10 @@ public class AuthController {
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid username or password");
         }
+    }
+
+    public ResponseEntity authByToken(@RequestHeader("Authorization") String token) {
+        User user = userService.getUserByToken(token);
+        return new ResponseEntity(UserDto.fromUser(user),HttpStatus.OK);
     }
 }

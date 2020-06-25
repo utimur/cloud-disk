@@ -18,6 +18,7 @@ public class Disk {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "disk")
     List<CloudFile> cloudFiles;
 }

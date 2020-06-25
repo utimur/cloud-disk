@@ -6,6 +6,7 @@ import com.example.clouddisk.exceptions.user.UserNotFoundException;
 import com.example.clouddisk.exceptions.user.UsernameAlreadyExist;
 import com.example.clouddisk.models.Basket;
 import com.example.clouddisk.models.Disk;
+import com.example.clouddisk.exceptions.user.*;
 import com.example.clouddisk.models.Role;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.repos.BasketRepo;
@@ -109,5 +110,12 @@ public class UserService {
         }
         user.setHasAvatar(true);
         return userRepo.save(user);
+    }
+
+    public void changePassword(User user, String newPassword){
+       if (newPassword.equals("") || newPassword.isEmpty()) throw new EmptyPasswordException("Password is empty");
+       if (newPassword.length() < 5) throw new ShortPasswordException("Password is short, length must be more than 4");
+       user.setPassword(passwordEncoder.encode(newPassword));
+       userRepo.save(user);
     }
 }
