@@ -1,6 +1,7 @@
 package com.example.clouddisk.service.file;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.util.Base64Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,5 +23,9 @@ public class Base64Encoder {
         }
 
         return encodedfile;
+    }
+
+    public static String decodeString(String base64) {
+        return new String(Base64.decodeBase64(base64));
     }
 }

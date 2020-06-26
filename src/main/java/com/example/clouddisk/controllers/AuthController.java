@@ -65,8 +65,15 @@ public class AuthController {
         }
     }
 
+    @GetMapping
     public ResponseEntity authByToken(@RequestHeader("Authorization") String token) {
         User user = userService.getUserByToken(token);
-        return new ResponseEntity(UserDto.fromUser(user),HttpStatus.OK);
+        String newToken = jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId());
+
+        Map<Object, Object> response = new HashMap<>();
+        response.put("token", newToken);
+        response.put("user", UserDto.fromUser(user));
+
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 }

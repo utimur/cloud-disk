@@ -11,11 +11,10 @@ import com.example.clouddisk.repos.BasketRepo;
 import com.example.clouddisk.repos.CloudFileRepo;
 import com.example.clouddisk.repos.DiskRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -47,6 +46,8 @@ public class FileService {
             if (!file.mkdir()) {
                 throw new DirNotCreatedException("Dir not created");
             }
+        } else {
+            throw new DirAlreadyExistException("Dir already exist");
         }
         return file;
     }
@@ -83,12 +84,31 @@ public class FileService {
         return cloudFileRepo.save(cloudFile);
     }
 
-//    public CloudFile saveFile(CloudFileDto cloudFileDto, User user) throws IOException {
-//        FileWriter fw = new FileWriter( "sample1.txt" );
-//        fw.close();
-//
-//        FileReader fr = new FileReader( "sample2.txt" );
-//        fr.close();
-//    }
+    public CloudFile saveFile(MultipartFile file, String filename, User user, Long parentId) throws IOException {
+        CloudFile cloudFile = new CloudFile();
+        if (parentId != null) {
+            cloudFile.setParent(cloudFileRepo.findById(parentId).get());
+        }
+        cloudFile.setSize(file.getSize());
+        cloudFile.setName(filename);
+        System.out.println(filename);
+        cloudFile.setType(filename.split("[.]")[1]);
+        cloudFile.setDisk(user.getDisk());
 
+        String path = getFullUserDiskPath(cloudFile, user);
+
+        File convertFile = new File(path);
+        if(!convertFile.exists()) {
+            convertFile.createNewFile();
+        }
+        FileOutputStream fout = new FileOutputStream(convertFile);
+        fout.write(file.getBytes());
+        fout.close();
+
+        return cloudFileRepo.save(cloudFile);
+    }
+
+    public List<CloudFile> getByParentIdAndDiskId(Long parentId, Long diskId) {
+        return cloudFileRepo.findCloudFilesByParentIdAndDiskId(parentId, diskId);
+    }
 }

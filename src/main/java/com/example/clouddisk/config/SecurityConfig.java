@@ -17,6 +17,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String LOGIN_ENDPOINT = "/auth/**";
     private static final String ADMIN_ENDPOINT = "/admin/**";
+    private static final String[] SWAGGER_ENDPOINT = {
+            "/v2/api-docs",
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/webjars/springfox-swagger-ui/**"
+    };
 
     @Autowired
     public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
@@ -42,6 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(LOGIN_ENDPOINT).permitAll()
                 .antMatchers(ADMIN_ENDPOINT).hasRole("ADMIN")
                 .antMatchers("/files/upload").permitAll()
+                .antMatchers(SWAGGER_ENDPOINT).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));
