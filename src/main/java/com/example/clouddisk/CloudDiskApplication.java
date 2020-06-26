@@ -1,5 +1,11 @@
 package com.example.clouddisk;
 
+import com.example.clouddisk.models.CloudFile;
+import com.example.clouddisk.models.Disk;
+import com.example.clouddisk.models.User;
+import com.example.clouddisk.repos.DiskRepo;
+import com.example.clouddisk.repos.UserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

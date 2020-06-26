@@ -13,6 +13,9 @@ import com.example.clouddisk.repos.DiskRepo;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 @Service
 public class FileService {
@@ -44,8 +47,6 @@ public class FileService {
             if (!file.mkdir()) {
                 throw new DirNotCreatedException("Dir not created");
             }
-        } else {
-            throw new DirAlreadyExistException("Dir already exist");
         }
         return file;
     }
@@ -81,5 +82,13 @@ public class FileService {
 
         return cloudFileRepo.save(cloudFile);
     }
+
+//    public CloudFile saveFile(CloudFileDto cloudFileDto, User user) throws IOException {
+//        FileWriter fw = new FileWriter( "sample1.txt" );
+//        fw.close();
+//
+//        FileReader fr = new FileReader( "sample2.txt" );
+//        fr.close();
+//    }
 
 }
