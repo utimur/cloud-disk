@@ -21,6 +21,7 @@ public class User {
     private Long freeSpace = new Long(0);
 
     private Boolean hasAvatar = false;
+    private Boolean isActivated = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",

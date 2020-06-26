@@ -15,6 +15,7 @@ import com.example.clouddisk.repos.RoleRepo;
 import com.example.clouddisk.repos.UserRepo;
 import com.example.clouddisk.security.jwt.JwtTokenProvider;
 import com.example.clouddisk.service.file.FileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,8 +36,9 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final DiskRepo diskRepo;
     private final BasketRepo basketRepo;
+    private final MailSender mailSender;
 
-    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService, JwtTokenProvider jwtTokenProvider, DiskRepo diskRepo, BasketRepo basketRepo) {
+    public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService, JwtTokenProvider jwtTokenProvider, DiskRepo diskRepo, BasketRepo basketRepo, MailSender mailSender) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.passwordEncoder = passwordEncoder;
@@ -44,6 +46,7 @@ public class UserService {
         this.jwtTokenProvider = jwtTokenProvider;
         this.diskRepo = diskRepo;
         this.basketRepo = basketRepo;
+        this.mailSender = mailSender;
     }
 
     public User register(User user) throws UsernameAlreadyExist, MailAlreadyExist {
@@ -59,6 +62,10 @@ public class UserService {
         user.setRoles(roles);
 
         userRepo.save(user);
+
+        // Отправка email активации на почту
+        String text = "Hello, " + user.getUsername() + ". Click on link to activate your account " +  "http://localhost:8080/auth/activation/" + jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId());
+        mailSender.sendMessage(user.getMail(), "Cloud Store. Account activation.", text);
 
         Disk disk = new Disk();
         Basket basket = new Basket();
