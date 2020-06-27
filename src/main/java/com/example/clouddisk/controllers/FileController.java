@@ -41,7 +41,7 @@ public class FileController {
 
     @PostMapping("/dir")
     public ResponseEntity createDirectory(@RequestHeader("Authorization") String authHeader,
-                                       @RequestBody CloudFileDto cloudFileDto) {
+                                          @RequestBody CloudFileDto cloudFileDto) {
         User user = userService.getUserByToken(authHeader);
         return ResponseEntity.ok(CloudFileDto.fromCloudFile(fileService.saveDir(cloudFileDto, user)));
     }
@@ -52,16 +52,13 @@ public class FileController {
             @RequestPart("file") MultipartFile file,
             @RequestPart String filename,
             @RequestParam(value = "parent_id", required = false) Long parentId,
-            @RequestHeader("Authorization") String token) {
+            @RequestHeader("Authorization") String token) throws IOException {
 
         User user = userService.getUserByToken(token);
         CloudFile cloudFile;
-        try {
-            cloudFile = fileService.saveFile(file, filename, user, parentId);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return new ResponseEntity("Failed", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+        cloudFile = fileService.saveFile(file, filename, user, parentId);
+
         return new ResponseEntity(CloudFileDto.fromCloudFile(cloudFile), HttpStatus.OK);
     }
 

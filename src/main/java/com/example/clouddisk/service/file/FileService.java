@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 @Service
@@ -86,16 +87,22 @@ public class FileService {
 
     public CloudFile saveFile(MultipartFile file, String filename, User user, Long parentId) throws IOException {
         CloudFile cloudFile = new CloudFile();
+        if (cloudFileRepo.findByParentIdAndNameAndDiskId(parentId, filename, user.getDisk().getId()) != null) {
+            throw new FileAlreadyExistsException("file already exist");
+        }
         if (parentId != null) {
             cloudFile.setParent(cloudFileRepo.findById(parentId).get());
         }
         cloudFile.setSize(file.getSize());
         cloudFile.setName(filename);
-        System.out.println(filename);
         cloudFile.setType(filename.split("[.]")[1]);
         cloudFile.setDisk(user.getDisk());
 
         String path = getFullUserDiskPath(cloudFile, user);
+
+        System.out.println(filename);
+        System.out.println(path);
+
 
         File convertFile = new File(path);
         if(!convertFile.exists()) {
