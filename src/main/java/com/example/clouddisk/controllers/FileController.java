@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,6 +44,9 @@ public class FileController {
     @PostMapping("/dir")
     public ResponseEntity createDirectory(@RequestHeader("Authorization") String authHeader,
                                           @RequestBody CloudFileDto cloudFileDto) {
+        if (cloudFileDto.getParentId() == 0) {
+            cloudFileDto.setParentId(null);
+        }
         User user = userService.getUserByToken(authHeader);
         return ResponseEntity.ok(CloudFileDto.fromCloudFile(fileService.saveDir(cloudFileDto, user)));
     }
@@ -66,9 +71,22 @@ public class FileController {
     public ResponseEntity getFiles(@RequestHeader("Authorization") String token,
                                    @RequestParam(value = "parent_id", required = false) Long parentId) {
         User user = userService.getUserByToken(token);
-        return ResponseEntity.ok(fileService.getByParentIdAndDiskId(parentId, user.getDisk().getId())
+        Map<Object, Object> response = new HashMap<>();
+        response.put("files", fileService.getByParentIdAndDiskId(parentId, user.getDisk().getId())
                 .stream()
                 .map(CloudFileDto::fromCloudFile)
                 .collect(Collectors.toList()));
+        if(parentId == null) {
+            response.put("backId", null);
+        } else {
+            CloudFile file = fileService.getById(parentId);
+            if ( file.getParent() == null) {
+                response.put("backId", null);
+            } else {
+                response.put("backId", file.getParent().getId());
+            }
+        }
+
+        return ResponseEntity.ok(response);
     }
 }

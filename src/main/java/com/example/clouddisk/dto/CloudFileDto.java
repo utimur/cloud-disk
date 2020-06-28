@@ -14,11 +14,14 @@ public class CloudFileDto {
 
     private String avatar;
     private String access_link;
+    private String path;
     private Long size = 0L;
 
     private Access access;
 
     private Long parentId;
+    private CloudFileDto parent;
+
 
     public static CloudFile toCloudFile(CloudFileDto cloudFileDto) {
         CloudFile cloudFile = new CloudFile();
@@ -44,6 +47,7 @@ public class CloudFileDto {
         cloudFileDto.setSize(cloudFile.getSize());
         if (cloudFile.getParent() != null) {
             cloudFileDto.setParentId(cloudFile.getParent().getId());
+            cloudFileDto.setParent(CloudFileDto.fromCloudFile(cloudFile.getParent()));
         }
         return cloudFileDto;
     }

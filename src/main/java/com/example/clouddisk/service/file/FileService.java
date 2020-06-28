@@ -118,4 +118,8 @@ public class FileService {
     public List<CloudFile> getByParentIdAndDiskId(Long parentId, Long diskId) {
         return cloudFileRepo.findCloudFilesByParentIdAndDiskId(parentId, diskId);
     }
+
+    public CloudFile getById(Long parentId) {
+        return cloudFileRepo.findById(parentId).get();
+    }
 }
