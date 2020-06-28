@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(LOGIN_ENDPOINT).permitAll()
                 .antMatchers(ADMIN_ENDPOINT).hasRole("ADMIN")
-                .antMatchers("/files/upload").permitAll()
+                .antMatchers("/files/**").permitAll()
                 .antMatchers(SWAGGER_ENDPOINT).permitAll()
                 .anyRequest().authenticated()
                 .and()

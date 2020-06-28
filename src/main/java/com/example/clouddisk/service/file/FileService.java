@@ -10,12 +10,19 @@ import com.example.clouddisk.models.User;
 import com.example.clouddisk.repos.BasketRepo;
 import com.example.clouddisk.repos.CloudFileRepo;
 import com.example.clouddisk.repos.DiskRepo;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FileService {
@@ -121,5 +128,11 @@ public class FileService {
 
     public CloudFile getById(Long parentId) {
         return cloudFileRepo.findById(parentId).get();
+    }
+
+    public Resource downloadFile(CloudFile cloudFile, User user) throws MalformedURLException {
+        Path path = Paths.get(getFullUserDiskPath(cloudFile, user));
+        Resource resource = new UrlResource(path.toUri());
+        return resource;
     }
 }

@@ -5,23 +5,20 @@ import com.example.clouddisk.dto.CloudFileDto;
 import com.example.clouddisk.models.CloudFile;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.service.UserService;
-import com.example.clouddisk.service.file.Base64Encoder;
 import com.example.clouddisk.service.file.FileService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,4 +86,18 @@ public class FileController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/download")
+    public ResponseEntity downloadFile(@RequestHeader("Authorization") String token,
+                                       @RequestParam("file_id") Long fileId) throws MalformedURLException {
+        CloudFile cloudFile = fileService.getById(fileId);
+        User user = userService.getUserByToken(token);
+        Resource resource = fileService.downloadFile(cloudFile, user);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("multipart/form-data"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
+
 }
