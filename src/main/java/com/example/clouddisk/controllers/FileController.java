@@ -2,6 +2,7 @@ package com.example.clouddisk.controllers;
 
 
 import com.example.clouddisk.dto.CloudFileDto;
+import com.example.clouddisk.dto.UserDto;
 import com.example.clouddisk.exceptions.user.FullSpaceException;
 import com.example.clouddisk.models.CloudFile;
 import com.example.clouddisk.models.User;
@@ -21,6 +22,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,15 +57,15 @@ public class FileController {
             @RequestHeader("Authorization") String token) throws IOException, FullSpaceException {
 
         User user = userService.getUserByToken(token);
-        if (user.getFreeSpace() + file.getSize() > (10 * 1024 * 1024 * 1024)) {
-            throw new FullSpaceException("Disk is full");
-        }
         CloudFile cloudFile;
         user.setFreeSpace(user.getFreeSpace()+file.getSize());
         userService.update(user);
         cloudFile = fileService.saveFile(file, filename, user, parentId);
+        Map<Object, Object> response = new HashMap<>();
+        response.put("file", CloudFileDto.fromCloudFile(cloudFile));
+        response.put("user", UserDto.fromUser(user));
 
-        return new ResponseEntity(CloudFileDto.fromCloudFile(cloudFile), HttpStatus.OK);
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
     @GetMapping
@@ -75,6 +77,38 @@ public class FileController {
                 .stream()
                 .map(CloudFileDto::fromCloudFile)
                 .collect(Collectors.toList()));
+        return getResponseFilesEntity(parentId, user, response);
+    }
+
+    @GetMapping("/order/type")
+    public ResponseEntity getFilesOrderByName(@RequestHeader("Authorization") String token,
+                                              @RequestParam(value = "parent_id", required = false) Long parentId,
+                                              @RequestParam(defaultValue = "false") Boolean desc) {
+        User user = userService.getUserByToken(token);
+        Map<Object, Object> response = new HashMap<>();
+        List<CloudFile> files = fileService.getByParentIdAndDiskIdOrderByType(parentId, user.getDisk().getId(), desc);
+        response.put("files", files.stream()
+                .map(CloudFileDto::fromCloudFile)
+                .collect(Collectors.toList()));
+
+        return getResponseFilesEntity(parentId, user, response);
+    }
+
+    @GetMapping("/order/name")
+    public ResponseEntity getFilesOrderByType(@RequestHeader("Authorization") String token,
+                                              @RequestParam(value = "parent_id", required = false) Long parentId,
+                                              @RequestParam(defaultValue = "false") Boolean desc) {
+        User user = userService.getUserByToken(token);
+        Map<Object, Object> response = new HashMap<>();
+        List<CloudFile> files = fileService.getByParentIdAndDiskIdOrderByName(parentId,user.getDisk().getId(),desc);
+        response.put("files", files.stream()
+                .map(CloudFileDto::fromCloudFile)
+                .collect(Collectors.toList()));
+
+        return getResponseFilesEntity(parentId, user, response);
+    }
+
+    private ResponseEntity getResponseFilesEntity(@RequestParam(value = "parent_id", required = false) Long parentId, User user, Map<Object, Object> response) {
         if(parentId == null) {
             response.put("backId", null);
             response.put("path", user.getUsername()+"\\disk\\" );

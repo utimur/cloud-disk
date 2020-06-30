@@ -11,4 +11,10 @@ public interface CloudFileRepo extends CrudRepository<CloudFile, Long> {
 
     CloudFile findByParentIdAndNameAndDiskId(Long parendId, String name, Long diskId);
 
+    List<CloudFile> findCloudFilesByParentIdAndDiskIdOrderByName(Long parentId, Long diskId);
+    List<CloudFile> findCloudFilesByParentIdAndDiskIdOrderByNameDesc(Long parentId, Long diskId);
+
+    List<CloudFile> findCloudFilesByParentIdAndDiskIdOrderByType(Long parentId, Long diskId);
+    List<CloudFile> findCloudFilesByParentIdAndDiskIdOrderByTypeDesc(Long parentId, Long diskId);
+
 }

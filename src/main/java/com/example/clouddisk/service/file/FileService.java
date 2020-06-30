@@ -147,4 +147,19 @@ public class FileService {
         }
         cloudFileRepo.deleteById(cloudFile.getId());
     }
+
+    public List<CloudFile> getByParentIdAndDiskIdOrderByName(Long parentId, Long diskId, Boolean desk) {
+        if(desk) {
+            return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByNameDesc(parentId, diskId);
+        }
+        return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByName(parentId, diskId);
+    }
+
+    public List<CloudFile> getByParentIdAndDiskIdOrderByType(Long parentId, Long diskId, Boolean desk) {
+        if(desk) {
+            return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByTypeDesc(parentId, diskId);
+        }
+        return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByType(parentId, diskId);
+    }
+
 }
