@@ -64,7 +64,7 @@ public class UserService {
         userRepo.save(user);
 
         // Отправка email активации на почту
-        String text = "Hello, " + user.getUsername() + ". Click on link to activate your account " +  "http://localhost:8080/auth/activation/" + jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId());
+        String text = "Hello, " + user.getUsername() + ". Click on link to activate your account " +  "http://localhost:3000/auth/activation/" + jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId());
         mailSender.sendMessage(user.getMail(), "Cloud Store. Account activation.", text);
 
         Disk disk = new Disk();
