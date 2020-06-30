@@ -2,6 +2,7 @@ package com.example.clouddisk.controllers;
 
 
 import com.example.clouddisk.dto.CloudFileDto;
+import com.example.clouddisk.exceptions.user.FullSpaceException;
 import com.example.clouddisk.models.CloudFile;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.service.UserService;
@@ -41,9 +42,6 @@ public class FileController {
     @PostMapping("/dir")
     public ResponseEntity createDirectory(@RequestHeader("Authorization") String authHeader,
                                           @RequestBody CloudFileDto cloudFileDto) {
-        if (cloudFileDto.getParentId() == 0) {
-            cloudFileDto.setParentId(null);
-        }
         User user = userService.getUserByToken(authHeader);
         return ResponseEntity.ok(CloudFileDto.fromCloudFile(fileService.saveDir(cloudFileDto, user)));
     }
@@ -54,11 +52,15 @@ public class FileController {
             @RequestPart("file") MultipartFile file,
             @RequestPart String filename,
             @RequestParam(value = "parent_id", required = false) Long parentId,
-            @RequestHeader("Authorization") String token) throws IOException {
+            @RequestHeader("Authorization") String token) throws IOException, FullSpaceException {
 
         User user = userService.getUserByToken(token);
+        if (user.getFreeSpace() + file.getSize() > (10 * 1024 * 1024 * 1024)) {
+            throw new FullSpaceException("Disk is full");
+        }
         CloudFile cloudFile;
-
+        user.setFreeSpace(user.getFreeSpace()+file.getSize());
+        userService.update(user);
         cloudFile = fileService.saveFile(file, filename, user, parentId);
 
         return new ResponseEntity(CloudFileDto.fromCloudFile(cloudFile), HttpStatus.OK);
@@ -75,7 +77,9 @@ public class FileController {
                 .collect(Collectors.toList()));
         if(parentId == null) {
             response.put("backId", null);
+            response.put("path", user.getUsername()+"\\disk\\" );
         } else {
+            response.put("path", fileService.getFullUserDiskPath(fileService.getById(parentId), user).substring(26));
             CloudFile file = fileService.getById(parentId);
             if ( file.getParent() == null) {
                 response.put("backId", null);
@@ -83,7 +87,6 @@ public class FileController {
                 response.put("backId", file.getParent().getId());
             }
         }
-
         return ResponseEntity.ok(response);
     }
 
@@ -100,4 +103,14 @@ public class FileController {
                 .body(resource);
     }
 
+    @DeleteMapping
+    public ResponseEntity deleteFile(@RequestHeader("Authorization") String token,
+                                     @RequestParam("file_id") Long fileId) throws IOException {
+        CloudFile cloudFile = fileService.getById(fileId);
+        User user = userService.getUserByToken(token);
+        fileService.deleteFile(cloudFile,user);
+        user.setFreeSpace(user.getFreeSpace()-cloudFile.getSize());
+        userService.update(user);
+        return ResponseEntity.ok("DELETE");
+    }
 }

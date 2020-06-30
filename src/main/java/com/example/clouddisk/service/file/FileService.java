@@ -10,6 +10,7 @@ import com.example.clouddisk.models.User;
 import com.example.clouddisk.repos.BasketRepo;
 import com.example.clouddisk.repos.CloudFileRepo;
 import com.example.clouddisk.repos.DiskRepo;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -134,5 +135,16 @@ public class FileService {
         Path path = Paths.get(getFullUserDiskPath(cloudFile, user));
         Resource resource = new UrlResource(path.toUri());
         return resource;
+    }
+
+    public void deleteFile(CloudFile cloudFile, User user) throws IOException {
+        String path = getFullUserDiskPath(cloudFile, user);
+        File file = new File(path);
+        if (cloudFile.getType().equals("dir")) {
+            FileUtils.deleteDirectory(file);
+        } else {
+            file.delete();
+        }
+        cloudFileRepo.deleteById(cloudFile.getId());
     }
 }

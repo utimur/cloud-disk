@@ -28,15 +28,15 @@ public class CloudFile {
     @JoinColumn(name = "access_id", referencedColumnName = "id")
     private Access access;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "basket_id")
     private Basket basket;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "disk_id")
     private Disk disk;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "parent_id", referencedColumnName = "id")
     private CloudFile parent;
 
