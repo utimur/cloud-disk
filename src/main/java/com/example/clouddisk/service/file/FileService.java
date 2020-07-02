@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService {
@@ -162,4 +163,12 @@ public class FileService {
         return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByType(parentId, diskId);
     }
 
+
+    public List<CloudFile> searchByName(Long diskId, String name) {
+        List<CloudFile> files = cloudFileRepo.findCloudFilesByDiskId(diskId);
+        return files
+                .stream()
+                .filter(cloudFile -> cloudFile.getName().toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+    }
 }

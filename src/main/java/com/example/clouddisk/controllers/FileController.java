@@ -147,4 +147,16 @@ public class FileController {
         userService.update(user);
         return ResponseEntity.ok("DELETE");
     }
+
+    @GetMapping("/search/name")
+    public ResponseEntity searchFilesByName(@RequestHeader("Authorization") String token,
+                                            @RequestParam String name) {
+        User user = userService.getUserByToken(token);
+        Map<Object, Object> response = new HashMap<>();
+        response.put("files",fileService.searchByName(user.getDisk().getId(), name).stream()
+                .map(CloudFileDto::fromCloudFile).collect(Collectors.toList()));
+        response.put("backId", null);
+        response.put("path", user.getUsername()+"\\disk\\" );
+        return ResponseEntity.ok(response);
+    }
 }
