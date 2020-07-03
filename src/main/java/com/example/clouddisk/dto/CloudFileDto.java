@@ -5,6 +5,8 @@ import com.example.clouddisk.models.Access;
 import com.example.clouddisk.models.CloudFile;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class CloudFileDto {
 
@@ -21,6 +23,7 @@ public class CloudFileDto {
 
     private Long parentId;
     private CloudFileDto parent;
+    private Date createdAt;
 
 
     public static CloudFile toCloudFile(CloudFileDto cloudFileDto) {
@@ -31,6 +34,7 @@ public class CloudFileDto {
         cloudFile.setAccess_link(cloudFileDto.getAccess_link());
         cloudFile.setAccess(cloudFileDto.getAccess());
         cloudFile.setSize(cloudFileDto.getSize());
+        cloudFile.setCreatedAt(cloudFileDto.getCreatedAt());
 
         return cloudFile;
     }
@@ -49,6 +53,7 @@ public class CloudFileDto {
             cloudFileDto.setParentId(cloudFile.getParent().getId());
             cloudFileDto.setParent(CloudFileDto.fromCloudFile(cloudFile.getParent()));
         }
+        cloudFileDto.setCreatedAt(cloudFile.getCreatedAt());
         return cloudFileDto;
     }
 }

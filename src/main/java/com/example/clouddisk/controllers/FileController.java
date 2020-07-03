@@ -108,6 +108,21 @@ public class FileController {
         return getResponseFilesEntity(parentId, user, response);
     }
 
+    @GetMapping("/order/date")
+    public ResponseEntity getFilesOrderByDate(@RequestHeader("Authorization") String token,
+                                              @RequestParam(value = "parent_id", required = false) Long parentId,
+                                              @RequestParam(defaultValue = "false") Boolean desc) {
+        HashMap<Object,Object> response = new HashMap<>();
+        User user = userService.getUserByToken(token);
+        List<CloudFile> cloudFiles = fileService.getByParentIdAndDiskIdOrderByDate(parentId, user.getDisk().getId(), desc);
+        response.put("files", cloudFiles.stream()
+                .map(CloudFileDto::fromCloudFile)
+                .collect(Collectors.toList())
+        );
+        return getResponseFilesEntity(parentId, user, response);
+
+    }
+
     private ResponseEntity getResponseFilesEntity(@RequestParam(value = "parent_id", required = false) Long parentId, User user, Map<Object, Object> response) {
         if(parentId == null) {
             response.put("backId", null);
