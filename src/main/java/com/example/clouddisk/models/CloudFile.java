@@ -2,8 +2,10 @@ package com.example.clouddisk.models;
 
 import com.sun.istack.NotNull;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -23,6 +25,9 @@ public class CloudFile {
     private String avatar;
     private String access_link;
     private Long size = 0L;
+
+    @Column(name = "created_at")
+    private Date createdAt = new Date();
 
     @OneToOne
     @JoinColumn(name = "access_id", referencedColumnName = "id")

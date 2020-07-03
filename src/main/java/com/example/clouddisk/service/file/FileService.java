@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,7 @@ public class FileService {
         createDir(path);
         cloudFile.setDisk(user.getDisk());
         cloudFile.setBasket(user.getBasket());
+        cloudFile.setCreatedAt(new Date());
 
         return cloudFileRepo.save(cloudFile);
     }
@@ -105,6 +107,8 @@ public class FileService {
         cloudFile.setName(filename);
         cloudFile.setType(filename.split("[.]")[1]);
         cloudFile.setDisk(user.getDisk());
+        cloudFile.setCreatedAt(new Date());
+        System.out.println("Date of created file is " + cloudFile.getCreatedAt());
 
         String path = getFullUserDiskPath(cloudFile, user);
 
@@ -160,6 +164,11 @@ public class FileService {
             return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByTypeDesc(parentId, diskId);
         }
         return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByType(parentId, diskId);
+    }
+    public List<CloudFile> getByParentIdAndDiskIdOrderByDate(Long parenId, Long diskId, Boolean desc) {
+        if (desc)
+            return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByCreatedAtDesc(parenId, diskId);
+         return cloudFileRepo.findCloudFilesByParentIdAndDiskIdOrderByCreatedAt(parenId,diskId);
     }
 
 }
