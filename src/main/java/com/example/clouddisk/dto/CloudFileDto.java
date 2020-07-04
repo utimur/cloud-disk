@@ -18,6 +18,7 @@ public class CloudFileDto {
     private String access_link;
     private String path;
     private Long size = 0L;
+    private Boolean isFavourite;
 
     private Access access;
 
@@ -49,6 +50,7 @@ public class CloudFileDto {
         cloudFileDto.setAccess_link(cloudFile.getAccess_link());
         cloudFileDto.setAvatar(cloudFile.getAvatar());
         cloudFileDto.setSize(cloudFile.getSize());
+        cloudFileDto.setIsFavourite(cloudFile.getIsFavourite());
         if (cloudFile.getParent() != null) {
             cloudFileDto.setParentId(cloudFile.getParent().getId());
             cloudFileDto.setParent(CloudFileDto.fromCloudFile(cloudFile.getParent()));

@@ -180,4 +180,14 @@ public class FileService {
                 .filter(cloudFile -> cloudFile.getName().toLowerCase().contains(name.toLowerCase()))
                 .collect(Collectors.toList());
     }
+
+    public CloudFile addFavourite(CloudFileDto cloudFileDto, User user) {
+        CloudFile cloudFile = cloudFileRepo.findById(cloudFileDto.getId()).get();
+        cloudFile.setIsFavourite(!cloudFile.getIsFavourite());
+        return cloudFileRepo.save(cloudFile);
+    }
+
+    public List<CloudFile> getFavourite(User user) {
+        return cloudFileRepo.findCloudFilesByDiskIdAndIsFavourite(user.getDisk().getId(), true);
+    }
 }

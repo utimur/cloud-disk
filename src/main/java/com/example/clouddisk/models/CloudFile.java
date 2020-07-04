@@ -22,6 +22,8 @@ public class CloudFile {
     @NotNull
     private String type;
 
+    private Boolean isFavourite = false;
+
     private String avatar;
     private String access_link;
     private Long size = 0L;

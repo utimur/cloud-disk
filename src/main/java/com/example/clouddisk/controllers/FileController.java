@@ -174,4 +174,28 @@ public class FileController {
         response.put("path", user.getUsername()+"\\disk\\" );
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/favourites")
+    public ResponseEntity addFavourites(@RequestHeader("Authorization") String token,
+                                        @RequestBody CloudFileDto cloudFileDto) throws Exception {
+        User user = userService.getUserByToken(token);
+        if (!cloudFileDto.getType().equals("dir")) {
+            throw new Exception("ERROR");
+        }
+        CloudFileDto response = CloudFileDto.fromCloudFile(fileService.addFavourite(cloudFileDto, user));
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/favourites")
+    public ResponseEntity getFavourites(@RequestHeader("Authorization") String token) throws Exception {
+        User user = userService.getUserByToken(token);
+
+        List files = fileService.getFavourite(user)
+                .stream()
+                .map(CloudFileDto::fromCloudFile)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity(files, HttpStatus.OK);
+    }
 }
