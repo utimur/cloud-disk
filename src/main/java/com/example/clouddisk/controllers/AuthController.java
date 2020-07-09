@@ -3,9 +3,7 @@ package com.example.clouddisk.controllers;
 
 import com.example.clouddisk.dto.AuthDto;
 import com.example.clouddisk.dto.UserDto;
-import com.example.clouddisk.exceptions.user.MailAlreadyExist;
-import com.example.clouddisk.exceptions.user.UserIsAlreadyActivatedException;
-import com.example.clouddisk.exceptions.user.UsernameAlreadyExist;
+import com.example.clouddisk.exceptions.user.*;
 import com.example.clouddisk.models.Disk;
 import com.example.clouddisk.models.User;
 import com.example.clouddisk.repos.DiskRepo;
@@ -52,40 +50,67 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody AuthDto authDto) {
+        Boolean sendActivationAgain = authDto.isNeedSendActivation();
+        HashMap<Object,Object> response = new HashMap<>();
         try {
             String username = authDto.getUsername();
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authDto.getPassword()));
             User user = userService.findByUsername(username);
 
-            String token = jwtTokenProvider.createToken(username, user.getRoles(), user.getId());
+            if (user.getIsActivated() || sendActivationAgain) {
+                if (sendActivationAgain) {
+                    userService.sendActivationEmail(user);
+                    response.put("user", UserDto.fromUser(user));
+                    return ResponseEntity.ok(response);
+                }
+                String token = jwtTokenProvider.createToken(username, user.getRoles(), user.getId(), false);
+                response.put("token", token);
+                response.put("user", UserDto.fromUser(user));
+                // Используется для того, чтобы снова отправить письмо с активацией
 
-            Map<Object, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("user", UserDto.fromUser(user));
+                return ResponseEntity.ok(response);
+            }
+            else {
+                response.put("error", UserIsNotActivatedException.getException());
+                Boolean needSendActivation = userService.checkPeriodActivation(user.getSentActivationAt().getTime());
+                response.put("needSendActivation", needSendActivation);
 
-            return ResponseEntity.ok(response);
+                return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(response);
+            }
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username or password");
+            response.put("error", UserNotFoundException.getException());
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(response);
         }
     }
 
     @GetMapping("/activation")
     public ResponseEntity activation(@RequestHeader("Authorization") String authHeader) {
-        System.out.println(authHeader);
         User user = userService.getUserByToken(authHeader);
-        if (user == null) throw new UsernameNotFoundException("User not found");
+        HashMap<Object,Object> response = new HashMap<>();
+        if (user == null)
+        {
+            response.put("error", UserNotFoundException.getException());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
         if (!user.getIsActivated()) {
             user.setIsActivated(true);
             userRepo.save(user);
             return ResponseEntity.ok(UserDto.fromUser(user));
         }
-        throw new UserIsAlreadyActivatedException("User is already activated");
+        response.put("error", UserIsAlreadyActivatedException.getException());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     @GetMapping
     public ResponseEntity authByToken(@RequestHeader("Authorization") String token) {
         User user = userService.getUserByToken(token);
-        String newToken = jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId());
+        String newToken = jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId(), false);
 
         Map<Object, Object> response = new HashMap<>();
         response.put("token", newToken);

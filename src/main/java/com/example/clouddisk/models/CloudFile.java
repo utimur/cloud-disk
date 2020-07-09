@@ -27,7 +27,7 @@ public class CloudFile {
     private Long size = 0L;
 
     @Column(name = "created_at")
-    private Date createdAt = new Date();
+    private Date createdAt;
 
     @OneToOne
     @JoinColumn(name = "access_id", referencedColumnName = "id")

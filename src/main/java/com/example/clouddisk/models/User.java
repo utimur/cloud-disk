@@ -3,6 +3,7 @@ package com.example.clouddisk.models;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,8 @@ public class User {
 
     private Boolean hasAvatar = false;
     private Boolean isActivated = false;
+    @Column(name = "sent_activation_at")
+    private Date sentActivationAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
