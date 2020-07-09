@@ -16,6 +16,7 @@ import com.example.clouddisk.repos.UserRepo;
 import com.example.clouddisk.security.jwt.JwtTokenProvider;
 import com.example.clouddisk.service.file.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -37,6 +39,9 @@ public class UserService {
     private final DiskRepo diskRepo;
     private final BasketRepo basketRepo;
     private final MailSender mailSender;
+
+    @Value("${jwt.token.activation.expired}")
+    private long validityActivationInMillSeconds;
 
     public UserService(UserRepo userRepo, RoleRepo roleRepo, BCryptPasswordEncoder passwordEncoder, FileService fileService, JwtTokenProvider jwtTokenProvider, DiskRepo diskRepo, BasketRepo basketRepo, MailSender mailSender) {
         this.userRepo = userRepo;
@@ -60,12 +65,9 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         List<Role> roles = Arrays.asList(roleRepo.findById(1L).get());
         user.setRoles(roles);
+        //В этой функции и сохраняется user
+        sendActivationEmail(user);
 
-        userRepo.save(user);
-
-        // Отправка email активации на почту
-        String text = "Hello, " + user.getUsername() + ". Click on link to activate your account " +  "http://localhost:3000/auth/activation/" + jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId());
-        mailSender.sendMessage(user.getMail(), "Cloud Store. Account activation.", text);
 
         Disk disk = new Disk();
         Basket basket = new Basket();
@@ -79,6 +81,14 @@ public class UserService {
         fileService.createRoot(user);
 
         return user;
+    }
+
+    public void sendActivationEmail(User user) {
+        // Отправка email активации на почту
+        String text = "Hello, " + user.getUsername() + ". Click on link to activate your account " +  "http://localhost:3000/auth/activation/" + jwtTokenProvider.createToken(user.getUsername(), user.getRoles(), user.getId(), true);
+        mailSender.sendMessage(user.getMail(), "Cloud Store. Account activation.", text);
+        user.setSentActivationAt(new Date());
+        userRepo.save(user);
     }
 
     public User findByUsername(String username) throws UserNotFoundException {
@@ -128,5 +138,12 @@ public class UserService {
 
     public User update(User user) {
         return userRepo.save(user);
+    }
+
+    // Вернёт true, если после отправления активации прошло более 30 дней
+    // time - дата, когда было отправлено письмо активации
+    public boolean checkPeriodActivation(Long time) {
+        Date currentDate = new Date();
+        return time + validityActivationInMillSeconds <= currentDate.getTime();
     }
 }

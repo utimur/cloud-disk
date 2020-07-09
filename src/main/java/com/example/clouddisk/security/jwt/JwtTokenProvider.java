@@ -28,6 +28,9 @@ public class JwtTokenProvider {
     @Value("${jwt.token.expired}")
     private long validityInMilliseconds;
 
+    @Value("${jwt.token.activation.expired}")
+    private long validityActivationInMillSeconds;
+
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -45,13 +48,16 @@ public class JwtTokenProvider {
 
 
 
-    public String createToken(String username, List<Role> roles, Long id) {
+    // isActivation - true - токен создаётся для отправления активации на почту, false - токен создаётся для авторизации. В зависимости от isActivation, будут созданы токены с различным временем жизни.
+    public String createToken(String username, List<Role> roles, Long id, boolean isActivation) {
 
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("roles", getRoleNames(roles));
         claims.put("id", id);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity;
+        if (!isActivation) validity = new Date(now.getTime() + validityInMilliseconds);
+        else validity = new Date(now.getTime() + validityActivationInMillSeconds);
 
         return Jwts.builder()//
                 .setClaims(claims)//
@@ -72,8 +78,14 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
+        if (bearerToken != null) {
+            if (bearerToken.startsWith("Bearer "))
+                return bearerToken.substring(7, bearerToken.length());
+            /*
+            if (bearerToken.startsWith("Activation "))
+                return bearerToken.substring(11, bearerToken.length());
+
+             */
         }
         return null;
     }
