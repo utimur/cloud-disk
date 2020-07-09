@@ -25,7 +25,8 @@ public class CloudFile {
     private Boolean isFavourite = false;
 
     private String avatar;
-    private String access_link;
+    private String accessLink;
+    private Boolean isAccessRoot;
     private Long size = 0L;
 
     @Column(name = "created_at")

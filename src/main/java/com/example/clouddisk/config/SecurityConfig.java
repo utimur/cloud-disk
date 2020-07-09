@@ -17,6 +17,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String LOGIN_ENDPOINT = "/auth/**";
     private static final String ADMIN_ENDPOINT = "/admin/**";
+    private static final String LINK_ACCESS_ENDPOINT = "/files/{link}";
     private static final String[] SWAGGER_ENDPOINT = {
             "/v2/api-docs",
             "/swagger-resources/**",

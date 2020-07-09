@@ -21,10 +21,7 @@ import java.net.MalformedURLException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -132,8 +129,8 @@ public class FileService {
         return cloudFileRepo.findCloudFilesByParentIdAndDiskId(parentId, diskId);
     }
 
-    public CloudFile getById(Long parentId) {
-        return cloudFileRepo.findById(parentId).get();
+    public CloudFile getById(Long id) {
+        return cloudFileRepo.findById(id).get();
     }
 
     public Resource downloadFile(CloudFile cloudFile, User user) throws MalformedURLException {
@@ -190,4 +187,31 @@ public class FileService {
     public List<CloudFile> getFavourite(User user) {
         return cloudFileRepo.findCloudFilesByDiskIdAndIsFavourite(user.getDisk().getId(), true);
     }
+
+    public void share(CloudFile cloudFile, User user, String uuid) {
+        if (cloudFile.getType().equals("dir")) {
+            cloudFile.setAccessLink(uuid);
+            List<CloudFile> files = cloudFileRepo.findCloudFilesByParentIdAndDiskId(cloudFile.getId(), user.getDisk().getId());
+            update(cloudFile);
+            for (CloudFile file : files) {
+                share(file, user, uuid);
+            }
+        } else {
+            cloudFile.setAccessLink(uuid);
+            update(cloudFile);
+        }
+    }
+
+    public List<CloudFile> getByAccessLink(String accessLink, Long parentId) {
+        if (parentId == null) {
+            return cloudFileRepo.findCloudFilesByAccessLinkAndIsAccessRoot(accessLink, true);
+        }
+        return cloudFileRepo.findCloudFilesByAccessLinkAndParentId(accessLink, parentId);
+    }
+
+
+    public CloudFile update(CloudFile cloudFile) {
+        return cloudFileRepo.save(cloudFile);
+    }
+
 }

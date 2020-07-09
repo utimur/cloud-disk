@@ -15,7 +15,7 @@ public class CloudFileDto {
     private String type;
 
     private String avatar;
-    private String access_link;
+    private String accessLink;
     private String path;
     private Long size = 0L;
     private Boolean isFavourite;
@@ -32,7 +32,7 @@ public class CloudFileDto {
         cloudFile.setName(cloudFileDto.getName());
         cloudFile.setType(cloudFileDto.getType());
         cloudFile.setAvatar(cloudFileDto.getAvatar());
-        cloudFile.setAccess_link(cloudFileDto.getAccess_link());
+        cloudFile.setAccessLink(cloudFileDto.getAccessLink());
         cloudFile.setAccess(cloudFileDto.getAccess());
         cloudFile.setSize(cloudFileDto.getSize());
         cloudFile.setCreatedAt(cloudFileDto.getCreatedAt());
@@ -47,7 +47,7 @@ public class CloudFileDto {
         cloudFileDto.setId(cloudFile.getId());
         cloudFileDto.setType(cloudFile.getType());
         cloudFileDto.setAccess(cloudFile.getAccess());
-        cloudFileDto.setAccess_link(cloudFile.getAccess_link());
+        cloudFileDto.setAccessLink(cloudFile.getAccessLink());
         cloudFileDto.setAvatar(cloudFile.getAvatar());
         cloudFileDto.setSize(cloudFile.getSize());
         cloudFileDto.setIsFavourite(cloudFile.getIsFavourite());

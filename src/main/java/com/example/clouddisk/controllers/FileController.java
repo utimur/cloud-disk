@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,8 +38,6 @@ public class FileController {
         this.fileService = fileService;
         this.userService = userService;
     }
-
-
 
 
     @PostMapping("/dir")
@@ -58,7 +57,7 @@ public class FileController {
 
         User user = userService.getUserByToken(token);
         CloudFile cloudFile;
-        user.setFreeSpace(user.getFreeSpace()+file.getSize());
+        user.setFreeSpace(user.getFreeSpace() + file.getSize());
         userService.update(user);
         cloudFile = fileService.saveFile(file, filename, user, parentId);
         Map<Object, Object> response = new HashMap<>();
@@ -100,7 +99,7 @@ public class FileController {
                                               @RequestParam(defaultValue = "false") Boolean desc) {
         User user = userService.getUserByToken(token);
         Map<Object, Object> response = new HashMap<>();
-        List<CloudFile> files = fileService.getByParentIdAndDiskIdOrderByName(parentId,user.getDisk().getId(),desc);
+        List<CloudFile> files = fileService.getByParentIdAndDiskIdOrderByName(parentId, user.getDisk().getId(), desc);
         response.put("files", files.stream()
                 .map(CloudFileDto::fromCloudFile)
                 .collect(Collectors.toList()));
@@ -112,7 +111,7 @@ public class FileController {
     public ResponseEntity getFilesOrderByDate(@RequestHeader("Authorization") String token,
                                               @RequestParam(value = "parent_id", required = false) Long parentId,
                                               @RequestParam(defaultValue = "false") Boolean desc) {
-        HashMap<Object,Object> response = new HashMap<>();
+        HashMap<Object, Object> response = new HashMap<>();
         User user = userService.getUserByToken(token);
         List<CloudFile> cloudFiles = fileService.getByParentIdAndDiskIdOrderByDate(parentId, user.getDisk().getId(), desc);
         response.put("files", cloudFiles.stream()
@@ -124,13 +123,13 @@ public class FileController {
     }
 
     private ResponseEntity getResponseFilesEntity(@RequestParam(value = "parent_id", required = false) Long parentId, User user, Map<Object, Object> response) {
-        if(parentId == null) {
+        if (parentId == null) {
             response.put("backId", null);
-            response.put("path", user.getUsername()+"\\disk\\" );
+            response.put("path", user.getUsername() + "\\disk\\");
         } else {
             response.put("path", fileService.getFullUserDiskPath(fileService.getById(parentId), user).substring(26));
             CloudFile file = fileService.getById(parentId);
-            if ( file.getParent() == null) {
+            if (file.getParent() == null) {
                 response.put("backId", null);
             } else {
                 response.put("backId", file.getParent().getId());
@@ -157,8 +156,8 @@ public class FileController {
                                      @RequestParam("file_id") Long fileId) throws IOException {
         CloudFile cloudFile = fileService.getById(fileId);
         User user = userService.getUserByToken(token);
-        fileService.deleteFile(cloudFile,user);
-        user.setFreeSpace(user.getFreeSpace()-cloudFile.getSize());
+        fileService.deleteFile(cloudFile, user);
+        user.setFreeSpace(user.getFreeSpace() - cloudFile.getSize());
         userService.update(user);
         return ResponseEntity.ok("DELETE");
     }
@@ -168,10 +167,10 @@ public class FileController {
                                             @RequestParam String name) {
         User user = userService.getUserByToken(token);
         Map<Object, Object> response = new HashMap<>();
-        response.put("files",fileService.searchByName(user.getDisk().getId(), name).stream()
+        response.put("files", fileService.searchByName(user.getDisk().getId(), name).stream()
                 .map(CloudFileDto::fromCloudFile).collect(Collectors.toList()));
         response.put("backId", null);
-        response.put("path", user.getUsername()+"\\disk\\" );
+        response.put("path", user.getUsername() + "\\disk\\");
         return ResponseEntity.ok(response);
     }
 
@@ -198,4 +197,41 @@ public class FileController {
 
         return new ResponseEntity(files, HttpStatus.OK);
     }
+
+//    @PostMapping("/share")
+//    public ResponseEntity share(@RequestHeader("Authorization") String token,
+//                                @RequestBody CloudFileDto cloudFileDto) {
+//        CloudFile cloudFile = fileService.getById(cloudFileDto.getId());
+//        User user = userService.getUserByToken(token);
+//        if (cloudFile.getAccessLink() == null) {
+//            cloudFile.setAccessLink(UUID.randomUUID().toString());
+//        }
+//        fileService.update(cloudFile);
+//        return ResponseEntity.ok(cloudFile.getAccessLink());
+//    }
+
+    @PostMapping("/share")
+    public ResponseEntity deleteShare(@RequestHeader("Authorization") String token,
+                                      @RequestBody CloudFileDto cloudFileDto) {
+        CloudFile cloudFile = fileService.getById(cloudFileDto.getId());
+        User user = userService.getUserByToken(token);
+        String link = UUID.randomUUID().toString();
+        cloudFile.setIsAccessRoot(true);
+        fileService.share(cloudFile, user, link);
+        return ResponseEntity.ok(link);
+    }
+
+    @GetMapping("/{link}")
+    public ResponseEntity deleteShare(@PathVariable String link,
+                                      @RequestParam(required = false) Long parentId) {
+        Map<Object, Object> response = new HashMap<>();
+        response.put("files", fileService.getByAccessLink(link, parentId)
+                                            .stream()
+                                            .map(CloudFileDto::fromCloudFile)
+                                            .collect(Collectors.toList()));
+        response.put("backId", null);
+        response.put("path", "disk\\");
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -22,4 +22,10 @@ public interface CloudFileRepo extends CrudRepository<CloudFile, Long> {
     List<CloudFile> findCloudFilesByParentIdAndDiskIdOrderByCreatedAtDesc(Long parentId, Long diskId);
 
     List<CloudFile> findCloudFilesByDiskIdAndIsFavourite(Long diskId, Boolean isFavourite);
+
+
+    CloudFile findByAccessLink(String accessLink);
+
+    List<CloudFile> findCloudFilesByAccessLinkAndIsAccessRoot(String link, Boolean isAccessRoot);
+    List<CloudFile> findCloudFilesByAccessLinkAndParentId(String link, Long parentId);
 }
