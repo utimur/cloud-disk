@@ -116,7 +116,7 @@ public class UserService {
         return userRepo.findByUsername(jwtTokenProvider.getUsername(authToken));
     }
 
-    public User saveAvatar(MultipartFile img, User user) throws IOException {
+    public File saveAvatar(MultipartFile img, User user) throws IOException {
         if(img != null) {
             String fileName = "avatar.jpg";
             File convertFile = new File(FileService.FILE_PATH + user.getUsername() + "\\" + fileName);
@@ -124,9 +124,11 @@ public class UserService {
             FileOutputStream fout = new FileOutputStream(convertFile);
             fout.write(img.getBytes());
             fout.close();
+            user.setHasAvatar(true);
+            userRepo.save(user);
+            return convertFile;
         }
-        user.setHasAvatar(true);
-        return userRepo.save(user);
+        return null;
     }
 
     public void changePassword(User user, String newPassword){
